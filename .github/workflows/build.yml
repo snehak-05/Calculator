@@ -1,50 +1,27 @@
-name: Build Kivy APK
-
-on:
-  push:
-    branches: [main]
-
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      - name: Install Dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libtinfo6 libncurses6 libstdc++6 openjdk-17-jdk
-          sudo ln -s /lib/x86_64-linux-gnu/libtinfo.so.6 /lib/x86_64-linux-gnu/libtinfo.so.5 || true
-          sudo ln -s /lib/x86_64-linux-gnu/libncurses.so.6 /lib/x86_64-linux-gnu/libncurses.so.5 || true
-
-      - name: Install Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      - name: Install Python
-        uses: actions/setup-python@v4
+      - name: Setup Python
+        uses: actions/setup-python@v3
         with:
           python-version: "3.8"
 
       - name: Install Buildozer & Dependencies
         run: |
           pip install --upgrade pip
-          pip install buildozer cython virtualenv
-          sudo apt-get install -y python3-pip unzip zlib1g-dev
-
-      - name: Accept Android SDK Licenses  # NEW STEP
+          pip install buildozer
+          sudo apt update
+          sudo apt install -y libtinfo5
+          
+      - name: Install Android SDK & Accept Licenses
         run: |
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+          yes | sdkmanager --licenses
+          sdkmanager "platforms;android-36" "build-tools;36.0.0"
 
       - name: Build APK
-        run: buildozer -v android debug
-
-      - name: Upload APK Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: package
-          path: bin/*.apk
+        run: |
+          buildozer -v android debug

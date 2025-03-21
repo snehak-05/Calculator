@@ -36,13 +36,8 @@ jobs:
           pip install buildozer cython virtualenv
           sudo apt-get install -y python3-pip unzip zlib1g-dev
 
-      - name: Initialize Buildozer
-        run: |
-          buildozer init
-
       - name: Build APK
-        run: |
-          buildozer -v android debug
+        run: buildozer -v android debug
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
